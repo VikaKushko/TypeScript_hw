@@ -1,37 +1,25 @@
-'use strict';
-
-
-function BankAccount() {
-    let balance = 0;
-
-    this.deposit = function (amount){
-        if (amount > 0) {
-            balance += parseFloat(amount);
-            console.log(`Поповнено: ${amount}. Новий баланс: ${balance}`);
-        } else {
-            console.log('Сума для поповнення повинна бути більшою за 0.');
-        }
+class EventManager {
+    constructor() {
+        this.events = {};
     }
 
-    this.withdraw = function (amount){
-        if (amount <= balance) {
-            balance -= parseFloat(amount);
-        } else if(amount > balance) {
-            console.log('Недостатньо коштів на рахунку');
-        } else {
-            console.log('Сума для зняття повинна бути більшою за 0');
-        }
+    on(event, callback) {
+        (this.events[event] ||= []).push(callback);
     }
 
+    off(event, callback) {
+        this.events[event] = (this.events[event] || []).filter(cb => cb !== callback);
+    }
 
-    this.getBalance = function () {
-        return balance;
+    trigger(event, ...args) {
+        (this.events[event] || []).forEach(cb => cb(...args));
     }
 }
 
-const myAccount = new BankAccount();
-myAccount.deposit(100);
-myAccount.withdraw(30);
-console.log(myAccount.getBalance());
-myAccount.withdraw(100);
-myAccount.deposit(-50);
+const message = new EventManager();
+
+const greet = (name) => console.log(`Hello ${name}`);
+message.on('greet', greet);
+message.trigger('greet', 'Vika');
+message.off('greet', greet);
+message.trigger('greet', 'Kate');
